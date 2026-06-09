@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Auth</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: white;
+        width: 380px;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #007bff;
+        border: none;
+        color: white;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    .toggle {
+        text-align: center;
+        margin-top: 10px;
+        cursor: pointer;
+        color: #007bff;
+    }
+
+    #message {
+        margin-top: 15px;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<div class="container" id="registerBox">
+    <h2>Register</h2>
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password">
+    <input type="text" id="regPhone" placeholder="Phone">
+    <button onclick="registerUser()">Register</button>
+    <div class="toggle" onclick="showLogin()">Already have an account? Sign In</div>
+    <div id="message"></div>
+</div>
+
+<div class="container" id="loginBox" style="display:none;">
+    <h2>Sign In</h2>
+    <input type="email" id="logEmail" placeholder="Email">
+    <input type="password" id="logPassword" placeholder="Password">
+    <button onclick="loginUser()">Sign In</button>
+    <div class="toggle" onclick="showRegister()">Don't have an account? Register</div>
+    <div id="message2"></div>
+</div>
+
+<script>
+function showLogin() {
+    document.getElementById("registerBox").style.display = "none";
+    document.getElementById("loginBox").style.display = "block";
+}
+
+function showRegister() {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("registerBox").style.display = "block";
+}
+
+// REGISTER USER
+async function registerUser() {
+    const data = {
+        name: document.getElementById("regName").value,
+        email: document.getElementById("regEmail").value,
+        password: document.getElementById("regPassword").value,
+        phone: document.getElementById("regPhone").value
+    };
+
+    try {
+        const res = await fetch("http://localhost:2004/root/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+        document.getElementById("message").innerHTML = "User Created Successfully!";
+    } catch (error) {
+        document.getElementById("message").innerHTML = "Error creating user!";
+    }
+}
+
+// LOGIN USER
+async function loginUser() {
+    const data = {
+        email: document.getElementById("logEmail").value,
+        password: document.getElementById("logPassword").value
+    };
+
+    try {
+        const res = await fetch("http://localhost:2004/root/signin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.status === 200) {
+            document.getElementById("message2").innerHTML = "Login Successful!";
+            localStorage.setItem("token", result.token);
+        } else {
+            document.getElementById("message2").innerHTML = result.message || "Invalid login!";
+        }
+    } catch (error) {
+        document.getElementById("message2").innerHTML = "Error logging in!";
+    }
+}
+</script>
+
+</body>
+</html>
